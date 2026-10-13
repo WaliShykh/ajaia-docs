@@ -55,14 +55,6 @@ export function DocumentEditor({ initial }: { initial: DocumentDTO }) {
     onUpdate: ({ editor: e }) => queue({ contentHtml: e.getHTML() }),
   });
 
-  const words = useEditorState({
-    editor,
-    selector: ({ editor: e }) => {
-      const text = e?.getText() ?? "";
-      return text.trim() ? text.trim().split(/\s+/).length : 0;
-    },
-  });
-
   return (
     <main className="flex flex-1 flex-col bg-slate-100/80">
       <div className="sticky top-16 z-20 border-b border-slate-200 bg-white/90 backdrop-blur-md">
@@ -141,9 +133,6 @@ export function DocumentEditor({ initial }: { initial: DocumentDTO }) {
           <article className="rounded-sm bg-white px-8 py-12 shadow-[0_1px_3px_rgba(15,23,42,.08),0_12px_32px_-12px_rgba(15,23,42,.18)] ring-1 ring-slate-200/70 sm:px-[72px] sm:py-16">
             {editor ? <EditorContent editor={editor} /> : <div className="min-h-[70vh] animate-pulse" aria-busy="true" />}
           </article>
-          <p className="text-right text-xs tabular-nums text-slate-500" aria-live="polite">
-            {words} {words === 1 ? "word" : "words"}
-          </p>
         </div>
       </div>
 
