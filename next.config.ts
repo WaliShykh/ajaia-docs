@@ -13,6 +13,9 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Type checking runs via TSGo (`npm run typecheck`, the native TypeScript compiler)
+  // before `next build`, so Next's slower built-in tsc pass is skipped.
+  typescript: { ignoreBuildErrors: true },
   serverExternalPackages: ["@electric-sql/pglite"],
   turbopack: {
     rules: {

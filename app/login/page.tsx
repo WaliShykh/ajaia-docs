@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/server/current-user";
-import { DEMO_PASSWORD, DEMO_USERS } from "@/lib/server/seed";
-import { LoginForm } from "@/components/LoginForm";
+import { getCurrentUser } from "@/server/current-user";
+import { DEMO_PASSWORD, DEMO_USERS } from "@/server/seed";
+import { routePaths } from "@/client/config/routePaths";
+import { LoginForm } from "@/client/components/auth/LoginForm";
 
 export const metadata: Metadata = { title: "Sign in" };
 
 export default async function LoginPage() {
-  if (await getCurrentUser()) redirect("/");
+  if (await getCurrentUser()) redirect(routePaths.home);
   return (
     <main className="flex flex-1 items-center justify-center p-6">
       <div className="w-full max-w-sm">

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { requireUser } from "@/lib/server/current-user";
-import { getDocument } from "@/lib/server/services/documents";
-import { NotFound } from "@/lib/server/errors";
-import { uuidSchema } from "@/lib/shared/schemas";
-import { DocumentEditor } from "@/components/editor/DocumentEditor";
+import { requireUser } from "@/server/current-user";
+import { getDocument } from "@/server/services/documents";
+import { NotFound } from "@/server/errors";
+import { uuidSchema } from "@/shared/schemas";
+import { DocumentEditor } from "@/client/components/editor/DocumentEditor";
 
 export const metadata: Metadata = { title: "Document" };
 

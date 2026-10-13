@@ -2,9 +2,9 @@
 import postgres from "postgres";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
-import * as schema from "../lib/server/schema";
-import { seed } from "../lib/server/seed";
-import type { Db } from "../lib/server/db";
+import * as schema from "../server/schema";
+import { seed } from "../server/seed";
+import type { Db } from "../server/db";
 
 const url = process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL;
 if (!url) {

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { authedRoute } from "@/lib/server/http";
-import { importDocument } from "@/lib/server/services/import";
-import { PayloadTooLarge, ValidationError } from "@/lib/server/errors";
-import { IMPORT_HELP, LIMITS } from "@/lib/shared/limits";
+import { authedRoute } from "@/server/http";
+import { importDocument } from "@/server/services/import";
+import { PayloadTooLarge, ValidationError } from "@/server/errors";
+import { IMPORT_HELP, LIMITS } from "@/shared/limits";
 
 export const POST = authedRoute(async ({ req, user }) => {
   // Reject oversized uploads before buffering the body.

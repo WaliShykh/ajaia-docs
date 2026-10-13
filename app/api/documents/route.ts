@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { authedRoute, parseJson, parseWith } from "@/lib/server/http";
-import { createDocument, listDocuments } from "@/lib/server/services/documents";
-import { createDocumentSchema, listQuerySchema } from "@/lib/shared/schemas";
+import { authedRoute, parseJson, parseWith } from "@/server/http";
+import { createDocument, listDocuments } from "@/server/services/documents";
+import { createDocumentSchema, listQuerySchema } from "@/shared/schemas";
 
 export const GET = authedRoute(async ({ req, user }) => {
   const q = parseWith(listQuerySchema, Object.fromEntries(req.nextUrl.searchParams));

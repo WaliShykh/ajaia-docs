@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { authedRoute, parseId, parseJson } from "@/lib/server/http";
-import { changeShareRole, removeShare } from "@/lib/server/services/shares";
-import { updateShareSchema } from "@/lib/shared/schemas";
+import { authedRoute, parseId, parseJson } from "@/server/http";
+import { changeShareRole, removeShare } from "@/server/services/shares";
+import { updateShareSchema } from "@/shared/schemas";
 
 type P = { id: string; userId: string };
 const ids = (p: P) => ({ documentId: parseId(p.id), userId: parseId(p.userId) });

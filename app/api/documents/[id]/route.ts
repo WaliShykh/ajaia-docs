@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { authedRoute, parseId, parseJson } from "@/lib/server/http";
-import { deleteDocument, getDocument, updateDocument } from "@/lib/server/services/documents";
-import { updateDocumentSchema } from "@/lib/shared/schemas";
+import { authedRoute, parseId, parseJson } from "@/server/http";
+import { deleteDocument, getDocument, updateDocument } from "@/server/services/documents";
+import { updateDocumentSchema } from "@/shared/schemas";
 
 type P = { id: string };
 

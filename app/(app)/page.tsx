@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { requireUser } from "@/lib/server/current-user";
-import { listDocuments } from "@/lib/server/services/documents";
-import { Dashboard } from "@/components/dashboard/Dashboard";
+import { requireUser } from "@/server/current-user";
+import { listDocuments } from "@/server/services/documents";
+import { Dashboard } from "@/client/components/dashboard/Dashboard";
 
 export const metadata: Metadata = { title: "Documents" };
 

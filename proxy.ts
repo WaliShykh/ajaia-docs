@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { SESSION_COOKIE } from "@/lib/session-cookie";
+import { SESSION_COOKIE } from "@/shared/session-cookie";
+import { routePaths } from "@/client/config/routePaths";
 
 /**
  * Runs before every page render:
@@ -12,8 +13,8 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hasSession = request.cookies.has(SESSION_COOKIE);
 
-  if (!hasSession && pathname !== "/login") {
-    const url = new URL("/login", request.url);
+  if (!hasSession && pathname !== routePaths.login) {
+    const url = new URL(routePaths.login, request.url);
     return NextResponse.redirect(url);
   }
 

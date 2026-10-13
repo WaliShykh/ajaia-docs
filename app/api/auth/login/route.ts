@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { clientIp, parseJson, publicRoute } from "@/lib/server/http";
-import { login } from "@/lib/server/services/auth";
-import { SESSION_COOKIE, sessionCookieOptions } from "@/lib/server/auth/session";
-import { loginSchema } from "@/lib/shared/schemas";
+import { clientIp, parseJson, publicRoute } from "@/server/http";
+import { login } from "@/server/services/auth";
+import { SESSION_COOKIE, sessionCookieOptions } from "@/server/auth/session";
+import { loginSchema } from "@/shared/schemas";
 
 export const POST = publicRoute(async (req) => {
   const input = await parseJson(req, loginSchema);

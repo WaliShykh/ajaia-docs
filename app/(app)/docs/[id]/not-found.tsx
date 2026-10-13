@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { routePaths } from "@/client/config/routePaths";
 
 export default function DocumentNotFound() {
   return (
@@ -7,7 +8,7 @@ export default function DocumentNotFound() {
       <p className="mt-2 text-sm text-slate-600">
         This document doesn&apos;t exist, or you don&apos;t have access to it. Ask the owner to share it with you.
       </p>
-      <Link href="/" className="mt-6 text-sm font-medium text-blue-600 hover:underline">Back to documents</Link>
+      <Link href={routePaths.home} className="mt-6 text-sm font-medium text-blue-600 hover:underline">Back to documents</Link>
     </main>
   );
 }
