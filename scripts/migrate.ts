@@ -12,9 +12,19 @@ if (!url) {
   process.exit(0);
 }
 
-const client = postgres(url, { max: 1, prepare: false });
-const db = drizzle(client, { schema });
-await migrate(db, { migrationsFolder: "drizzle" });
-await seed(db as unknown as Db);
-await client.end();
-console.log("Migrations applied and demo data seeded.");
+async function main(databaseUrl: string) {
+  const client = postgres(databaseUrl, { max: 1, prepare: false });
+  try {
+    const db = drizzle(client, { schema });
+    await migrate(db, { migrationsFolder: "drizzle" });
+    await seed(db as unknown as Db);
+    console.log("Migrations applied and demo data seeded.");
+  } finally {
+    await client.end();
+  }
+}
+
+main(url).catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
