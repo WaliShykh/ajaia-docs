@@ -10,13 +10,14 @@ A lightweight collaborative document editor: create, format, import and share ri
 | `bob@ajaia.test` | `demo1234` | Can edit Q4 Planning; owns a private doc nobody else can see |
 | `carol@ajaia.test` | `demo1234` | Read-only access to Q4 Planning |
 
-The login page has one-click **Sign in as …** buttons for each account.
+The login page has one-click **Sign in as …** buttons for each account, or you can **create your own account** at `/signup`.
 
 ---
 
 ## Features
 
-- **Documents**: create, rename (inline title), edit, delete. Debounced autosave with a visible *Saving… / Saved / Couldn't save – Retry* status.
+- **Accounts**: sign up (name, email, password ≥ 8 characters) or sign in. Sessions are database-backed and revocable, and both forms are rate limited.
+- **Documents**: a card dashboard with live text previews; create, rename (inline title), edit, delete. Debounced autosave with a visible *Saving… / Saved / Couldn't save – Retry* status.
 - **Rich text** (Tiptap): bold, italic, underline, H1–H3, bulleted and numbered lists, quotes, undo/redo, plus standard keyboard shortcuts (⌘B / ⌘I / ⌘U …).
 - **File import**: upload **.txt, .md or .docx (max 2 MB)** to create a new editable document. Formatting is kept (Markdown headings and lists, Word bold and italic).
 - **Sharing**: the owner shares by email as **Viewer** or **Editor**, can change roles or revoke access, and sees who has access. The dashboard splits **My documents** from **Shared with me** (shared docs show owner and role).

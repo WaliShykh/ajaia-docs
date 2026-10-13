@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import type { Db } from "./db";
 import { documents, documentShares, users } from "./schema";
+import { excerptFromHtml } from "./sanitize";
 
 export const DEMO_PASSWORD = "demo1234";
 export const DEMO_USERS = [
@@ -11,6 +12,8 @@ export const DEMO_USERS = [
 ] as const;
 
 const PLANNING_DOC = `<h1>Q4 Planning</h1><p>This document is <strong>owned by Alice</strong>, shared with <em>Bob as an editor</em> and <u>Carol as a viewer</u>.</p><h2>Goals</h2><ol><li><p>Ship the collaborative editor beta</p></li><li><p>Reduce onboarding time by 30%</p></li></ol><h2>Open questions</h2><ul><li><p>Do we need offline support?</p></li><li><p>Which teams pilot first?</p></li></ul>`;
+
+const BOB_DOC = "<p>Only Bob can see this document — it isn't shared with anyone.</p>";
 
 /** Idempotent: safe to run on every deploy. Only creates what's missing. */
 export async function seed(db: Db) {
@@ -29,7 +32,7 @@ export async function seed(db: Db) {
   if (aliceDocs.length === 0) {
     const [doc] = await db
       .insert(documents)
-      .values({ ownerId: alice.id, title: "Q4 Planning", contentHtml: PLANNING_DOC })
+      .values({ ownerId: alice.id, title: "Q4 Planning", contentHtml: PLANNING_DOC, excerpt: excerptFromHtml(PLANNING_DOC) })
       .returning();
     await db.insert(documentShares).values([
       { documentId: doc.id, userId: bob.id, role: "editor", createdBy: alice.id },
@@ -42,7 +45,8 @@ export async function seed(db: Db) {
     await db.insert(documents).values({
       ownerId: bob.id,
       title: "Bob's private notes",
-      contentHtml: "<p>Only Bob can see this document — it isn't shared with anyone.</p>",
+      contentHtml: BOB_DOC,
+      excerpt: excerptFromHtml(BOB_DOC),
     });
   }
 }

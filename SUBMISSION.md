@@ -6,6 +6,8 @@
 
 ## Test accounts
 
+Reviewers can also create their own account at `/signup`.
+
 | Email | Password | Role in the seeded data |
 |---|---|---|
 | alice@ajaia.test | demo1234 | Owner of "Q4 Planning" |
@@ -29,14 +31,15 @@ The login page has one-click buttons for each. Suggested flow:
 | `VIDEO_URL.txt` | Link to the walkthrough video |
 | `docs/screenshots/` | Screenshots of the main flows |
 | `app/`, `client/`, `server/`, `shared/` | Source code (Next.js routes, frontend, backend, shared contracts) |
-| `tests/` | Vitest suites (18 tests) and a `.docx` fixture |
+| `tests/` | Vitest suites (22 tests) and a `.docx` fixture |
 | `drizzle/` | SQL migrations |
 | `scripts/migrate.ts` | Migration + idempotent seed used by the Vercel build |
 | `proxy.ts` | Per-request CSP and signed-out redirect |
 
 ## What works end to end
 
-- Sign in / sign out with seeded accounts. Sessions are DB-backed and revocable; login is rate limited.
+- Sign up, sign in and sign out (plus seeded demo accounts). Sessions are DB-backed and revocable; login and sign-up are rate limited.
+- A card-based dashboard with text previews, share counts and owner avatars; toast confirmations for sharing, imports and deletes.
 - Create, rename, edit and delete documents. Autosave shows status and offers retry on failure.
 - Rich text: bold, italic, underline, H1–H3, bulleted and numbered lists, quote, undo/redo, keyboard shortcuts.
 - Import **.txt / .md / .docx (≤ 2 MB)** into a new document with formatting kept. Other types, mismatched contents and oversized files get clear errors.
@@ -49,7 +52,7 @@ The login page has one-click buttons for each. Suggested flow:
 
 - Real-time co-editing and presence. Concurrent edits are *detected*, not merged.
 - Comments, suggestion mode, version history, export.
-- Email invites for people without accounts, and password reset or sign-up (accounts are seeded).
+- Email invites for people without accounts, email verification and password reset.
 - Images, links and tables in documents. They are excluded from the schema and the sanitizer allowlist on purpose.
 
 ## Next 2–4 hours

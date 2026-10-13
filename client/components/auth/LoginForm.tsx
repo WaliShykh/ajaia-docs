@@ -1,10 +1,13 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ArrowRight } from "lucide-react";
 import { Form } from "react-aria-components";
 import { Button } from "../ui/Button";
 import { TextField } from "../ui/TextField";
 import { Alert } from "../ui/Alert";
+import { Avatar } from "../ui/Avatar";
 import { authService } from "@/client/services/authService";
 import { routePaths } from "@/client/config/routePaths";
 
@@ -15,10 +18,10 @@ export function LoginForm({ demoUsers, demoPassword }: { demoUsers: DemoUser[]; 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const [pending, setPending] = useState<string | null>(null);
 
   async function signIn(creds: { email: string; password: string }) {
-    setPending(true);
+    setPending(creds.email);
     setError(null);
     try {
       await authService.login(creds.email, creds.password);
@@ -26,46 +29,60 @@ export function LoginForm({ demoUsers, demoPassword }: { demoUsers: DemoUser[]; 
       router.refresh();
     } catch (e) {
       setError((e as Error).message);
-      setPending(false);
+      setPending(null);
     }
   }
 
+  const submitting = pending !== null && pending === email;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <Form
-        className="space-y-4 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200"
+        className="space-y-4"
         onSubmit={(e) => {
           e.preventDefault();
           void signIn({ email, password });
         }}
       >
         {error && <Alert>{error}</Alert>}
-        <TextField label="Email" type="email" name="email" autoComplete="username" isRequired value={email} onChange={setEmail} />
+        <TextField label="Email" type="email" name="email" autoComplete="username" isRequired value={email} onChange={setEmail} placeholder="you@company.com" />
         <TextField label="Password" type="password" name="password" autoComplete="current-password" isRequired value={password} onChange={setPassword} />
-        <Button type="submit" className="w-full" isPending={pending}>
-          {pending ? "Signing in…" : "Sign in"}
+        <Button type="submit" size="lg" className="w-full" isPending={submitting}>
+          {submitting ? "Signing in…" : "Sign in"}
         </Button>
+        <p className="text-center text-sm text-slate-600">
+          New here?{" "}
+          <Link href={routePaths.signup} className="font-medium text-indigo-600 hover:text-indigo-500">Create an account</Link>
+        </p>
       </Form>
 
-      <section aria-labelledby="demo-heading" className="rounded-xl border border-dashed border-slate-300 p-4">
-        <h2 id="demo-heading" className="text-sm font-medium text-slate-800">Demo accounts</h2>
-        <p className="mt-1 text-xs text-slate-600">
-          All use the password <code className="rounded bg-slate-100 px-1">{demoPassword}</code>. Sign in as different users to try sharing.
-        </p>
-        <div className="mt-3 grid gap-2">
+      <section aria-labelledby="demo-heading">
+        <div className="flex items-center gap-3">
+          <span className="h-px flex-1 bg-slate-200" />
+          <h2 id="demo-heading" className="text-xs font-medium uppercase tracking-wider text-slate-500">Or try a demo account</h2>
+          <span className="h-px flex-1 bg-slate-200" />
+        </div>
+        <div className="mt-4 grid gap-2">
           {demoUsers.map((u) => (
             <Button
               key={u.email}
               variant="secondary"
-              className="justify-between"
-              isDisabled={pending}
+              className="group h-auto justify-start gap-3 px-3 py-2.5 text-left"
+              isDisabled={pending !== null}
               onPress={() => void signIn({ email: u.email, password: demoPassword })}
             >
-              <span>Sign in as {u.name.split(" ")[0]}</span>
-              <span className="text-xs text-slate-500">{u.email}</span>
+              <Avatar name={u.name} size="md" className="ring-0" />
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-medium text-slate-900">Sign in as {u.name.split(" ")[0]}</span>
+                <span className="block truncate text-xs font-normal text-slate-500">{u.email}</span>
+              </span>
+              <ArrowRight aria-hidden className="size-4 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-indigo-600" />
             </Button>
           ))}
         </div>
+        <p className="mt-3 text-center text-xs text-slate-500">
+          Demo password: <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-slate-700">{demoPassword}</code>
+        </p>
       </section>
     </div>
   );

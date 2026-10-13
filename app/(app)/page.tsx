@@ -11,5 +11,5 @@ export default async function DashboardPage() {
     listDocuments(user, "owned"),
     listDocuments(user, "shared"),
   ]);
-  return <Dashboard initialOwned={owned} initialShared={shared} />;
+  return <Dashboard user={user} initialOwned={owned} initialShared={shared} />;
 }

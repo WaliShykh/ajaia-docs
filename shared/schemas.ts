@@ -27,6 +27,15 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Enter your password.").max(LIMITS.passwordMax),
 });
 
+export const signupSchema = z.object({
+  name: z.string().trim().min(1, "Enter your name.").max(80, "Name must be 80 characters or fewer."),
+  email,
+  password: z
+    .string()
+    .min(LIMITS.passwordMin, `Use at least ${LIMITS.passwordMin} characters.`)
+    .max(LIMITS.passwordMax),
+});
+
 export const createDocumentSchema = z.object({
   title: title.optional(),
   contentHtml: contentHtml.optional(),
@@ -54,6 +63,7 @@ export const listQuerySchema = z.object({
 export const uuidSchema = z.uuid({ message: "Invalid id." });
 
 export type LoginInput = z.infer<typeof loginSchema>;
+export type SignupInput = z.infer<typeof signupSchema>;
 export type CreateDocumentInput = z.infer<typeof createDocumentSchema>;
 export type UpdateDocumentInput = z.infer<typeof updateDocumentSchema>;
 export type CreateShareInput = z.infer<typeof createShareSchema>;

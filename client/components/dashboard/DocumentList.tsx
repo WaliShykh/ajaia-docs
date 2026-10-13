@@ -1,34 +1,30 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
-import { FileText, MoreHorizontal } from "lucide-react";
-import { Button as RACButton } from "react-aria-components";
-import { Button, focusRing } from "../ui/Button";
-import { Badge } from "../ui/Badge";
+import { FileText, Inbox } from "lucide-react";
+import { Button } from "../ui/Button";
 import { Dialog } from "../ui/Dialog";
-import { Menu, MenuItem } from "../ui/Menu";
 import { Alert } from "../ui/Alert";
-import { cx } from "@/client/utils/cx";
+import { toast } from "../ui/Toast";
+import { DocumentCard } from "./DocumentCard";
 import { documentService } from "@/client/services/documentService";
-import { routePaths } from "@/client/config/routePaths";
-import { roleRegistry } from "@/client/registry/roles";
-import { formatRelative } from "@/client/utils/format";
-import type { DocumentSummaryDTO, Page } from "@/shared/types";
+import type { DocumentListItemDTO, Page } from "@/shared/types";
 
 export function DocumentList({
   scope,
   initial,
+  emptyTitle,
   emptyText,
 }: {
   scope: "owned" | "shared";
-  initial: Page<DocumentSummaryDTO>;
+  initial: Page<DocumentListItemDTO>;
+  emptyTitle: string;
   emptyText: string;
 }) {
   const [items, setItems] = useState(initial.items);
   const [cursor, setCursor] = useState(initial.nextCursor);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [toDelete, setToDelete] = useState<DocumentSummaryDTO | null>(null);
+  const [toDelete, setToDelete] = useState<DocumentListItemDTO | null>(null);
 
   async function loadMore() {
     if (!cursor) return;
@@ -44,54 +40,42 @@ export function DocumentList({
     }
   }
 
-  async function confirmDelete(doc: DocumentSummaryDTO, close: () => void) {
+  async function confirmDelete(doc: DocumentListItemDTO, close: () => void) {
     try {
       await documentService.remove(doc.id);
       setItems((prev) => prev.filter((d) => d.id !== doc.id));
-      close();
+      toast.success("Document deleted", `“${doc.title}” was removed for everyone.`);
     } catch (e) {
-      setError((e as Error).message);
-      close();
+      toast.error("Couldn't delete document", (e as Error).message);
     }
+    close();
   }
 
   if (items.length === 0) {
-    return <p className="rounded-lg border border-dashed border-slate-300 bg-white px-6 py-12 text-center text-sm text-slate-600">{emptyText}</p>;
+    const Icon = scope === "owned" ? FileText : Inbox;
+    return (
+      <div className="flex flex-col items-center rounded-2xl border border-dashed border-slate-300 bg-white/60 px-6 py-16 text-center">
+        <span className="grid size-14 place-items-center rounded-2xl bg-indigo-50 text-indigo-500">
+          <Icon aria-hidden className="size-7" />
+        </span>
+        <h3 className="mt-4 font-semibold text-slate-900">{emptyTitle}</h3>
+        <p className="mt-1 max-w-sm text-sm text-slate-600">{emptyText}</p>
+      </div>
+    );
   }
 
   return (
     <>
-      {error && <div className="mb-3"><Alert>{error}</Alert></div>}
-      <ul className="divide-y divide-slate-200 overflow-hidden rounded-lg bg-white ring-1 ring-slate-200">
+      {error && <div className="mb-4"><Alert>{error}</Alert></div>}
+      <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {items.map((doc) => (
-          <li key={doc.id} className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50">
-            <FileText aria-hidden className="size-5 shrink-0 text-blue-600" />
-            <Link href={routePaths.document(doc.id)} className={cx("min-w-0 flex-1 rounded", focusRing)}>
-              <div className="truncate font-medium text-slate-900">{doc.title}</div>
-              <div className="text-xs text-slate-500" suppressHydrationWarning>
-                {scope === "shared" ? `Owned by ${doc.owner.name} · ` : ""}Edited {formatRelative(doc.updatedAt)}
-              </div>
-            </Link>
-            {scope === "shared" ? (
-              <Badge tone={roleRegistry[doc.role].tone}>{roleRegistry[doc.role].badge}</Badge>
-            ) : (
-              <Menu
-                label={`Actions for ${doc.title}`}
-                trigger={
-                  <RACButton aria-label={`Actions for ${doc.title}`} className={cx("rounded p-1.5 text-slate-500 hover:bg-slate-200", focusRing)}>
-                    <MoreHorizontal aria-hidden className="size-4" />
-                  </RACButton>
-                }
-              >
-                <MenuItem href={routePaths.document(doc.id)}>Open</MenuItem>
-                <MenuItem danger onAction={() => setToDelete(doc)}>Delete</MenuItem>
-              </Menu>
-            )}
+          <li key={doc.id}>
+            <DocumentCard doc={doc} scope={scope} onDelete={() => setToDelete(doc)} />
           </li>
         ))}
       </ul>
       {cursor && (
-        <div className="mt-4 flex justify-center">
+        <div className="mt-8 flex justify-center">
           <Button variant="secondary" onPress={() => void loadMore()} isPending={loading}>Load more</Button>
         </div>
       )}

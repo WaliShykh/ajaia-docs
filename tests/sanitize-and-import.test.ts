@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { beforeAll, describe, expect, it } from "vitest";
 import { demoUser } from "./helpers";
-import { sanitizeDocumentHtml } from "@/server/sanitize";
+import { excerptFromHtml, sanitizeDocumentHtml } from "@/server/sanitize";
 import { convertFileToHtml } from "@/server/importers";
 import { importDocument } from "@/server/services/import";
 import { createDocument, updateDocument } from "@/server/services/documents";
@@ -34,6 +34,18 @@ describe("HTML sanitisation", () => {
     expect(doc.contentHtml).toBe("<p>ok</p>");
     const updated = await updateDocument(alice, doc.id, { version: doc.version, contentHtml: '<p style="x" onmouseover="y()">z</p>' });
     expect(updated.contentHtml).toBe("<p>z</p>");
+  });
+});
+
+describe("dashboard previews", () => {
+  it("derives a plain-text excerpt on every write", async () => {
+    expect(excerptFromHtml("<h1>Plan</h1><p>Ship &amp; <strong>learn</strong></p><ul><li><p>a</p></li></ul>")).toBe("Plan Ship & learn a");
+    expect(excerptFromHtml(`<p>${"word ".repeat(100)}</p>`).length).toBeLessThanOrEqual(200);
+
+    const doc = await createDocument(alice, { contentHtml: "<p>first</p>" });
+    expect(doc.excerpt).toBe("first");
+    const updated = await updateDocument(alice, doc.id, { version: doc.version, contentHtml: "<h2>New</h2><p>text</p>" });
+    expect(updated.excerpt).toBe("New text");
   });
 });
 

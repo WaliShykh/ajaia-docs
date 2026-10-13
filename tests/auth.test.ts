@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { login } from "@/server/services/auth";
+import { login, signup } from "@/server/services/auth";
 import { deleteSession, validateSessionToken } from "@/server/auth/session";
-import { RateLimited, Unauthorized } from "@/server/errors";
+import { RateLimited, Unauthorized, ValidationError } from "@/server/errors";
+import { signupSchema } from "@/shared/schemas";
 
 describe("authentication", () => {
   it("issues a session that validates, and revokes it on logout", async () => {
@@ -30,5 +31,33 @@ describe("authentication", () => {
     expect(await validateSessionToken(undefined)).toBeNull();
     expect(await validateSessionToken("not-a-real-token")).toBeNull();
     expect(await validateSessionToken("x".repeat(500))).toBeNull();
+  });
+});
+
+describe("sign-up", () => {
+  it("creates an account, signs it in, and lets it log in later", async () => {
+    const input = signupSchema.parse({ name: "  Dana Lee ", email: "Dana@Example.com", password: "correct horse" });
+    const { user, token } = await signup(input, "10.0.1.1");
+    expect(user).toMatchObject({ name: "Dana Lee", email: "dana@example.com" });
+    expect((await validateSessionToken(token))?.id).toBe(user.id);
+    const again = await login({ email: "dana@example.com", password: "correct horse" }, "10.0.1.1");
+    expect(again.user.id).toBe(user.id);
+  });
+
+  it("rejects duplicate emails (case-insensitive) and weak passwords", async () => {
+    await expect(
+      signup(signupSchema.parse({ name: "Imposter", email: "ALICE@ajaia.test", password: "whatever123" }), "10.0.1.2"),
+    ).rejects.toBeInstanceOf(ValidationError);
+    expect(signupSchema.safeParse({ name: "x", email: "x@y.co", password: "short" }).success).toBe(false);
+    expect(signupSchema.safeParse({ name: " ", email: "x@y.co", password: "longenough" }).success).toBe(false);
+  });
+
+  it("rate-limits account creation per IP", async () => {
+    for (let i = 0; i < 10; i++) {
+      await signup(signupSchema.parse({ name: `Bot ${i}`, email: `bot${i}@spam.test`, password: "password123" }), "10.0.1.3");
+    }
+    await expect(
+      signup(signupSchema.parse({ name: "Bot", email: "bot-x@spam.test", password: "password123" }), "10.0.1.3"),
+    ).rejects.toBeInstanceOf(RateLimited);
   });
 });

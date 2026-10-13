@@ -6,10 +6,14 @@ export type UserDTO = { id: string; email: string; name: string };
 export type DocumentSummaryDTO = {
   id: string;
   title: string;
+  excerpt: string;
   updatedAt: string;
   role: Role;
   owner: { id: string; name: string };
 };
+
+/** List rows additionally carry how many people a document is shared with. */
+export type DocumentListItemDTO = DocumentSummaryDTO & { shareCount: number };
 
 export type DocumentDTO = DocumentSummaryDTO & {
   contentHtml: string;

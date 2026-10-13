@@ -5,12 +5,14 @@
 export const routePaths = {
   home: "/",
   login: "/login",
+  signup: "/signup",
   document: (id: string) => `/docs/${encodeURIComponent(id)}`,
 } as const;
 
 export const apiPaths = {
   auth: {
     login: "/api/auth/login",
+    signup: "/api/auth/signup",
     logout: "/api/auth/logout",
   },
   documents: {

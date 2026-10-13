@@ -16,13 +16,16 @@ body {
 
 /* ---- Document typography (editor content) ---- */
 .doc-content {
-  @apply text-[15px] leading-7 text-slate-800 outline-none;
+  @apply text-[16px] leading-[1.75] text-slate-800 outline-none caret-indigo-600;
+}
+.doc-content ::selection {
+  @apply bg-indigo-100;
 }
 .doc-content > * + * {
   @apply mt-3;
 }
 .doc-content h1 {
-  @apply text-3xl font-semibold tracking-tight text-slate-900 mt-6;
+  @apply text-[2rem] leading-tight font-bold tracking-tight text-slate-900 mt-2;
 }
 .doc-content h2 {
   @apply text-2xl font-semibold tracking-tight text-slate-900 mt-5;
@@ -40,7 +43,7 @@ body {
   @apply my-0.5;
 }
 .doc-content blockquote {
-  @apply border-l-4 border-slate-300 pl-4 italic text-slate-600;
+  @apply border-l-4 border-indigo-200 bg-indigo-50/40 py-1 pl-4 italic text-slate-600;
 }
 .doc-content code {
   @apply rounded bg-slate-100 px-1 py-0.5 font-mono text-[0.9em];

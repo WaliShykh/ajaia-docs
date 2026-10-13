@@ -31,3 +31,16 @@ const OPTIONS: sanitizeHtml.IOptions = {
 export function sanitizeDocumentHtml(html: string): string {
   return sanitizeHtml(html, OPTIONS).trim();
 }
+
+const EXCERPT_MAX = 200;
+
+/** Plain-text preview of (already sanitised) document HTML for dashboard cards. */
+export function excerptFromHtml(html: string): string {
+  const text = sanitizeHtml(html.replace(/<\/(p|h[1-6]|li|blockquote|pre)>|<br\s*\/?>/gi, " "), {
+    allowedTags: [],
+    allowedAttributes: {},
+  });
+  // sanitize-html leaves entities encoded; decode the few it emits.
+  const decoded = text.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+  return decoded.replace(/\s+/g, " ").trim().slice(0, EXCERPT_MAX);
+}

@@ -17,9 +17,9 @@ export function Dialog({
     <ModalOverlay
       isDismissable={role !== "alertdialog"}
       {...overlay}
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/40 p-4 pt-[12vh]"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/50 p-4 pt-[12vh] backdrop-blur-sm"
     >
-      <Modal className="w-full max-w-lg rounded-xl bg-white shadow-xl ring-1 ring-slate-900/5">
+      <Modal className="w-full max-w-lg rounded-2xl bg-white shadow-2xl ring-1 ring-slate-900/5">
         <RACDialog role={role} className="outline-none p-6">
           {({ close }) => (
             <>

@@ -39,10 +39,12 @@ I treated the AI as a fast pair, not an oracle. I owned the product and architec
 | Toolbar buttons as plain RAC `ToggleButton`s | Added `preventFocusOnPress` | **Found in browser testing:** clicking a toolbar button stole focus, so typed text went nowhere |
 | Select trigger rendering the whole option | Render only `selectedText` | Seen in a screenshot: the role descriptions were crammed into the trigger |
 | PGlite pointed at `.data/pglite` | Create the directory first | Found by the first smoke test (`ENOENT`) |
+| `.vercelignore` with an unanchored `docs` pattern | Anchored every pattern (`/docs`) | **A miss that reached production:** it also excluded `app/(app)/docs`, so every document page 404'd on Vercel. The API smoke test passed because it never requested a page; the post-deploy check now loads pages for all three users. |
+| Migration script with top-level `await` | Wrapped in an async `main()` | Broke the first Vercel build; the local run had exited before reaching it. Reproduced locally before redeploying. |
 
 ## How I verified correctness, UX and reliability
 
-- **Automated tests (Vitest, 18 tests, real Postgres via in-memory PGlite).** Covered:
+- **Automated tests (Vitest, 22 tests, real Postgres via in-memory PGlite).** Covered:
   - The full permission matrix
   - 404-not-403 for strangers
   - Role change and revocation
@@ -53,6 +55,8 @@ I treated the AI as a fast pair, not an oracle. I owned the product and architec
   - Markdown, text and .docx conversion
   - Spoofed and oversized uploads
   - Session revocation, generic login errors, rate limiting
+  - Sign-up: duplicate emails, weak passwords, per-IP rate limit
+  - Dashboard excerpts derived on every write
 - **Testing the tests.** I deliberately broke the policy (gave editors `share`) and the sanitizer (allowed `onclick`). The suite failed both times, then passed again once reverted.
 - **API smoke script** with three users' cookies against the running server, including CSRF and rate-limit checks.
 - **Manual UI pass in a real browser.**

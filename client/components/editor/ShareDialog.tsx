@@ -7,6 +7,8 @@ import { Dialog } from "../ui/Dialog";
 import { TextField } from "../ui/TextField";
 import { Select } from "../ui/Select";
 import { Alert } from "../ui/Alert";
+import { Avatar } from "../ui/Avatar";
+import { toast } from "../ui/Toast";
 import { cx } from "@/client/utils/cx";
 import { shareService } from "@/client/services/shareService";
 import { shareRoleOptions } from "@/client/registry/roles";
@@ -35,7 +37,6 @@ function ShareDialogBody({ documentId, close }: { documentId: string; close: () 
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<ShareRole>("editor");
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
@@ -48,11 +49,10 @@ function ShareDialogBody({ documentId, close }: { documentId: string; close: () 
   async function add() {
     setPending(true);
     setError(null);
-    setNotice(null);
     try {
       const share = await shareService.add(documentId, email, role);
       setShares((prev) => [...(prev ?? []).filter((s) => s.user.id !== share.user.id), share]);
-      setNotice(`Shared with ${share.user.name} as ${share.role}.`);
+      toast.success(`Shared with ${share.user.name}`, `They can now ${share.role === "editor" ? "view and edit" : "view"} this document.`);
       setEmail("");
     } catch (e) {
       setError((e as Error).message);
@@ -67,6 +67,7 @@ function ShareDialogBody({ documentId, close }: { documentId: string; close: () 
     setShares((prev) => prev?.map((s) => (s.user.id === userId ? { ...s, role: next } : s)) ?? null);
     try {
       await shareService.changeRole(documentId, userId, next);
+      toast.success("Access updated", `Changed to ${next}.`);
     } catch (e) {
       setShares(before); // roll back optimistic update
       setError((e as Error).message);
@@ -77,7 +78,9 @@ function ShareDialogBody({ documentId, close }: { documentId: string; close: () 
     setError(null);
     try {
       await shareService.remove(documentId, userId);
+      const removed = shares?.find((s) => s.user.id === userId);
       setShares((prev) => prev?.filter((s) => s.user.id !== userId) ?? null);
+      toast.success("Access removed", removed ? `${removed.user.name} can no longer open this document.` : undefined);
     } catch (e) {
       setError((e as Error).message);
     }
@@ -107,7 +110,6 @@ function ShareDialogBody({ documentId, close }: { documentId: string; close: () 
       </Form>
 
       {error && <Alert>{error}</Alert>}
-      {notice && <Alert tone="info">{notice}</Alert>}
 
       <div>
         <h3 className="mb-2 text-sm font-medium text-slate-700">People with access</h3>
@@ -117,11 +119,12 @@ function ShareDialogBody({ documentId, close }: { documentId: string; close: () 
           <GridList
             aria-label="People with access"
             items={shares}
-            renderEmptyState={() => <p className="py-3 text-sm text-slate-500">Only you can access this document.</p>}
-            className="divide-y divide-slate-100 rounded-md ring-1 ring-slate-200 outline-none"
+            renderEmptyState={() => <p className="px-3 py-4 text-sm text-slate-500">Only you can access this document. Add people above to collaborate.</p>}
+            className="divide-y divide-slate-100 rounded-xl ring-1 ring-slate-200 outline-none"
           >
             {(s) => (
-              <GridListItem id={s.user.id} textValue={s.user.name} className="flex items-center gap-3 px-3 py-2 outline-none focus-visible:bg-slate-50">
+              <GridListItem id={s.user.id} textValue={s.user.name} className="flex items-center gap-3 px-3 py-2.5 outline-none focus-visible:bg-slate-50">
+                <Avatar name={s.user.name} size="md" className="ring-0" />
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium text-slate-900">{s.user.name}</div>
                   <div className="truncate text-xs text-slate-500">{s.user.email}</div>

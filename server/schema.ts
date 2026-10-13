@@ -48,6 +48,9 @@ export const documents = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     title: text("title").notNull(),
     contentHtml: text("content_html").notNull().default(""),
+    // Plain-text preview for dashboard cards, derived on every write so list
+    // queries never have to load or parse document bodies.
+    excerpt: text("excerpt").notNull().default(""),
     // Optimistic concurrency token, incremented on every write.
     version: integer("version").notNull().default(1),
     createdAt: ts("created_at").notNull().defaultNow(),

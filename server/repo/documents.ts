@@ -11,9 +11,12 @@ const owner = alias(users, "owner");
 const summaryColumns = {
   id: documents.id,
   title: documents.title,
+  excerpt: documents.excerpt,
   updatedAt: documents.updatedAt,
   ownerId: owner.id,
   ownerName: owner.name,
+  // Index-only count on the share PK; shown as "Shared with N" on owned cards.
+  shareCount: sql<number>`(select count(*)::int from ${documentShares} s where s.document_id = ${documents.id})`,
 };
 
 export type Cursor = { updatedAt: Date; id: string };
@@ -79,7 +82,7 @@ export async function findWithRole(db: Db, documentId: string, userId: string) {
 
 export async function insertDocument(
   db: Db,
-  values: { ownerId: string; title: string; contentHtml: string },
+  values: { ownerId: string; title: string; contentHtml: string; excerpt: string },
 ) {
   const [row] = await db.insert(documents).values(values).returning();
   return row;
@@ -90,7 +93,7 @@ export async function updateDocumentIfVersion(
   db: Db,
   id: string,
   expectedVersion: number,
-  patch: { title?: string; contentHtml?: string },
+  patch: { title?: string; contentHtml?: string; excerpt?: string },
 ) {
   const [row] = await db
     .update(documents)

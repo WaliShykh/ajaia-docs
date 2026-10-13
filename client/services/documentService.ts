@@ -1,12 +1,12 @@
 import { api } from "./http";
 import { apiPaths } from "@/client/config/routePaths";
-import type { DocumentDTO, DocumentSummaryDTO, Page } from "@/shared/types";
+import type { DocumentDTO, DocumentListItemDTO, Page } from "@/shared/types";
 
 type Doc = { document: DocumentDTO };
 
 export const documentService = {
   list: (scope: "owned" | "shared", cursor?: string | null) =>
-    api<Page<DocumentSummaryDTO>>(apiPaths.documents.list({ scope, cursor })),
+    api<Page<DocumentListItemDTO>>(apiPaths.documents.list({ scope, cursor })),
   create: (input: { title?: string; contentHtml?: string } = {}) =>
     api<Doc>(apiPaths.documents.create, { method: "POST", json: input }).then((r) => r.document),
   update: (id: string, patch: { version: number; title?: string; contentHtml?: string }) =>

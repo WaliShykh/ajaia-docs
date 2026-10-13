@@ -13,7 +13,8 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hasSession = request.cookies.has(SESSION_COOKIE);
 
-  if (!hasSession && pathname !== routePaths.login) {
+  const isPublic = pathname === routePaths.login || pathname === routePaths.signup;
+  if (!hasSession && !isPublic) {
     const url = new URL(routePaths.login, request.url);
     return NextResponse.redirect(url);
   }

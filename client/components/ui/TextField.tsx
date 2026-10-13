@@ -10,7 +10,7 @@ import {
 import { cx } from "@/client/utils/cx";
 
 export const inputClass =
-  "h-9 w-full rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 invalid:border-red-500";
+  "h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 outline-none transition focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 invalid:border-red-500";
 
 export function TextField({
   label,

@@ -2,6 +2,7 @@ export const LIMITS = {
   titleMax: 200,
   contentMaxBytes: 1_000_000,
   uploadMaxBytes: 2 * 1024 * 1024,
+  passwordMin: 8,
   passwordMax: 200,
   pageSize: 20,
 } as const;

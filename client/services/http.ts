@@ -20,7 +20,7 @@ export async function api<T>(path: string, init: { method?: string; json?: unkno
   } catch {
     throw new ApiError(0, "network", "Can't reach the server. Check your connection and try again.");
   }
-  if (res.status === 401 && typeof window !== "undefined" && path !== apiPaths.auth.login) {
+  if (res.status === 401 && typeof window !== "undefined" && path !== apiPaths.auth.login && path !== apiPaths.auth.signup) {
     // Session expired or revoked: a full reload drops any client state from the old session.
     window.location.assign(routePaths.login);
   }

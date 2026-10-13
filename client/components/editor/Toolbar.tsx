@@ -11,16 +11,16 @@ const formatShortcut = (s: string) =>
   isMac ? s.replace("Mod+", "⌘").replace("Shift+", "⇧").replace("Alt+", "⌥") : s.replace("Mod", "Ctrl");
 
 const btn = cx(
-  "grid size-8 place-items-center rounded text-slate-700 outline-none transition-colors",
-  "hover:bg-slate-100 pressed:bg-slate-200 selected:bg-blue-100 selected:text-blue-700",
-  "focus-visible:ring-2 focus-visible:ring-blue-500 disabled:opacity-40",
+  "grid size-9 place-items-center rounded-lg text-slate-600 outline-none transition-colors",
+  "hover:bg-slate-100 hover:text-slate-900 pressed:bg-slate-200 selected:bg-indigo-100 selected:text-indigo-700",
+  "focus-visible:ring-2 focus-visible:ring-indigo-500 disabled:opacity-35",
 );
 
 function Tip({ label, children }: { label: string; children: ReactNode }) {
   return (
     <TooltipTrigger delay={500} closeDelay={0}>
       {children}
-      <Tooltip offset={6} className="rounded bg-slate-900 px-2 py-1 text-xs text-white shadow">{label}</Tooltip>
+      <Tooltip offset={8} className="rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white shadow-lg">{label}</Tooltip>
     </TooltipTrigger>
   );
 }
@@ -41,10 +41,10 @@ export function Toolbar({ editor }: { editor: Editor }) {
   });
 
   return (
-    <RACToolbar aria-label="Text formatting" className="flex flex-wrap items-center gap-0.5">
+    <RACToolbar aria-label="Text formatting" className="flex flex-wrap items-center justify-center gap-0.5">
       {commandGroups.map((group, i) => (
         <Fragment key={group.id}>
-          {i > 0 && <Separator orientation="vertical" className="mx-1 h-5 w-px bg-slate-200" />}
+          {i > 0 && <Separator orientation="vertical" className="mx-1.5 h-6 w-px bg-slate-200" />}
           <Group aria-label={group.label} className="flex gap-0.5">
             {editorCommands
               .filter((c) => c.group === group.id)

@@ -9,7 +9,7 @@ The brief asks for a coherent slice, not a Google Docs clone. I put the time int
 3. **Security baseline with no shortcuts.** Sanitization on every write, revocable sessions, CSRF and CSP, rate-limited login, and upload content-sniffing.
 4. **Zero-friction review.** One-click demo logins, `pnpm i && pnpm dev` with no database to install, and a free-tier deployment.
 
-**Deliberately cut:** real-time co-editing, comments, version history, export, and email invites. Each would be shallow in the timebox. The path to each is described below.
+**Deliberately cut:** real-time co-editing, comments, version history, export, email invites and password reset. Each would be shallow in the timebox. The path to each is described below.
 
 ## Stack
 
@@ -55,7 +55,7 @@ Browser ──► proxy.ts (CSP nonce, signed-out redirect)
 ```
 users(id, email UNIQUE, name, password_hash)
 sessions(id, token_hash UNIQUE, user_id → users, expires_at)
-documents(id, owner_id → users, title, content_html, version, created_at, updated_at)
+documents(id, owner_id → users, title, content_html, excerpt, version, created_at, updated_at)
     INDEX (owner_id, updated_at DESC, id DESC)
 document_shares(document_id → documents, user_id → users, role ENUM(viewer, editor), created_by)
     PK (document_id, user_id), INDEX (user_id, document_id)
@@ -64,6 +64,7 @@ rate_limits(key, window_start, count)  PK (key, window_start)
 
 - **Ownership is a column, not a share row.** There is exactly one owner, and it can't be revoked by accident.
 - **Content is sanitized HTML.** Tiptap reads and writes it natively, the importers produce it, and it's human-readable in the DB. Storing ProseMirror JSON would make server-side import conversion and sanitization harder for no benefit at this scope.
+- **`excerpt`** is a plain-text preview derived on every write, so dashboard cards show content without list queries ever loading document bodies.
 - **`version`** is an optimistic-concurrency token: `UPDATE … WHERE id = $1 AND version = $2`. Zero rows updated means 409 Conflict.
 
 ## Access policy (`shared/policy.ts`)
@@ -87,13 +88,14 @@ rate_limits(key, window_start, count)  PK (key, window_start)
 | Script injection generally | Per-request **nonce CSP** with `strict-dynamic`, `object-src 'none'`, `base-uri 'none'`, `frame-ancestors 'none'`. `style-src` allows inline *style attributes* because React Aria and ProseMirror position elements with them; inline styles can't execute code. |
 | Session theft / fixation | 256-bit random token in an `HttpOnly; Secure; SameSite=Lax` cookie with the `__Host-` prefix in production. Only a SHA-256 hash is stored. Logout deletes the row (real revocation). 7-day expiry, checked in SQL. |
 | CSRF | SameSite=Lax, **plus** every mutating API request must carry an `Origin` matching the host. JSON-only bodies except the multipart import. |
-| Credential guessing / enumeration | bcrypt (cost 12). The same generic error for a wrong password and an unknown email, and a dummy hash compare for unknown emails so timing matches. Postgres-backed rate limits: 5 / 15 min per IP+email, 50 / 15 min per IP. |
+| Credential guessing / enumeration | bcrypt (cost 12). The same generic error for a wrong password and an unknown email, and a dummy hash compare for unknown emails so timing matches. Postgres-backed rate limits: 5 / 15 min per IP+email, 50 / 15 min per IP; sign-up 10 / hour per IP. Passwords must be at least 8 characters. |
 | Malicious uploads | Extension allowlist **plus content sniffing**: `.docx` must start with the ZIP signature, and `.txt`/`.md` must be valid UTF-8 with no NUL bytes. 2 MB cap checked on `Content-Length` and again on the bytes. Parsed in memory; nothing is written to disk or served back raw. |
 | Injection | Parameterized queries only (Drizzle); path IDs validated as UUIDs. |
 | Misc headers | `nosniff`, `X-Frame-Options: DENY`, HSTS, strict `Referrer-Policy`, `Permissions-Policy`, COOP, `poweredByHeader: false`. |
 
 **Known tradeoffs, accepted for this scope:**
 
+- **Sign-up reveals whether an email is registered.** Every sign-up form does; the rate limit keeps it from being used for bulk enumeration. Email verification and password reset are out of scope.
 - **Sharing reveals whether an account exists.** Sharing with an unknown email says "No user found", which tells a signed-in user that the email has no account. An internal tool can live with that; a public product would send invites instead.
 - **IP-keyed rate limits depend on the host.** They trust `x-real-ip` / `x-forwarded-for`, which Vercel sets correctly.
 - **Successful logins count toward the per-account limit.**

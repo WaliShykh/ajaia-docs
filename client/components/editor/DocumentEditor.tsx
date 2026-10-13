@@ -1,12 +1,13 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, CloudOff, Loader2, Share2 } from "lucide-react";
-import { EditorContent, useEditor } from "@tiptap/react";
+import { ArrowLeft, Check, CloudOff, Eye, FileText, Loader2, Share2 } from "lucide-react";
+import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
 import { Input, TextField } from "react-aria-components";
 import { Button } from "../ui/Button";
 import { Badge } from "../ui/Badge";
 import { Alert } from "../ui/Alert";
+import { Avatar } from "../ui/Avatar";
 import { Toolbar } from "./Toolbar";
 import { ShareDialog } from "./ShareDialog";
 import { editorExtensions } from "@/client/registry/editorExtensions";
@@ -28,7 +29,7 @@ function SaveIndicator({ status, onRetry }: { status: SaveStatus; onRetry: () =>
       </span>
     );
   if (status === "conflict") return <span className="text-xs text-amber-700">Not saved</span>;
-  return <span className="flex items-center gap-1.5 text-xs text-slate-500"><Check aria-hidden className="size-3.5" />Saved</span>;
+  return <span className="flex items-center gap-1.5 text-xs text-emerald-700"><Check aria-hidden className="size-3.5" />Saved</span>;
 }
 
 export function DocumentEditor({ initial }: { initial: DocumentDTO }) {
@@ -44,7 +45,7 @@ export function DocumentEditor({ initial }: { initial: DocumentDTO }) {
     immediatelyRender: false, // avoid SSR hydration mismatch
     editorProps: {
       attributes: {
-        class: "doc-content min-h-[60vh]",
+        class: "doc-content min-h-[70vh]",
         "aria-label": "Document content",
         "aria-multiline": "true",
         role: "textbox",
@@ -54,36 +55,57 @@ export function DocumentEditor({ initial }: { initial: DocumentDTO }) {
     onUpdate: ({ editor: e }) => queue({ contentHtml: e.getHTML() }),
   });
 
+  const words = useEditorState({
+    editor,
+    selector: ({ editor: e }) => {
+      const text = e?.getText() ?? "";
+      return text.trim() ? text.trim().split(/\s+/).length : 0;
+    },
+  });
+
   return (
-    <main className="flex flex-1 flex-col">
-      <div className="sticky top-14 z-20 border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-3 px-4 py-2">
-          <Link href={routePaths.home} aria-label="Back to documents" className="rounded p-1.5 text-slate-600 outline-none hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-blue-500">
+    <main className="flex flex-1 flex-col bg-slate-100/80">
+      <div className="sticky top-16 z-20 border-b border-slate-200 bg-white/90 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-2.5 sm:px-6">
+          <Link
+            href={routePaths.home}
+            aria-label="Back to documents"
+            className="rounded-lg p-2 text-slate-500 outline-none transition hover:bg-slate-100 hover:text-slate-800 focus-visible:ring-2 focus-visible:ring-indigo-500"
+          >
             <ArrowLeft aria-hidden className="size-4" />
           </Link>
-          <TextField
-            aria-label="Document title"
-            value={title}
-            isReadOnly={!editable}
-            maxLength={LIMITS.titleMax}
-            onChange={(v) => {
-              setTitle(v);
-              if (v.trim()) queue({ title: v.trim() });
-            }}
-            onBlur={() => {
-              if (!title.trim()) {
-                setTitle(DEFAULT_TITLE);
-                queue({ title: DEFAULT_TITLE });
-              }
-            }}
-            className="min-w-0 flex-1"
-          >
-            <Input className="w-full truncate rounded border border-transparent bg-transparent px-2 py-1 text-lg font-medium text-slate-900 outline-none hover:border-slate-200 focus:border-blue-500 read-only:hover:border-transparent" />
-          </TextField>
+          <span aria-hidden className="grid size-9 place-items-center rounded-lg bg-indigo-50 text-indigo-600">
+            <FileText className="size-5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <TextField
+              aria-label="Document title"
+              value={title}
+              isReadOnly={!editable}
+              maxLength={LIMITS.titleMax}
+              onChange={(v) => {
+                setTitle(v);
+                if (v.trim()) queue({ title: v.trim() });
+              }}
+              onBlur={() => {
+                if (!title.trim()) {
+                  setTitle(DEFAULT_TITLE);
+                  queue({ title: DEFAULT_TITLE });
+                }
+              }}
+            >
+              <Input className="-ml-1.5 w-full max-w-xl truncate rounded-md border border-transparent bg-transparent px-1.5 py-0.5 text-[17px] font-semibold text-slate-900 outline-none transition hover:border-slate-200 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 read-only:hover:border-transparent" />
+            </TextField>
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <span>Owned by {initial.role === "owner" ? "you" : initial.owner.name}</span>
+              {editable && <><span aria-hidden>·</span><SaveIndicator status={status} onRetry={() => void retry()} /></>}
+            </div>
+          </div>
           <div className="flex items-center gap-3">
-            {editable && <SaveIndicator status={status} onRetry={() => void retry()} />}
-            {initial.role === "viewer" && <Badge tone={roleRegistry.viewer.tone}>{roleRegistry.viewer.badge}</Badge>}
-            {initial.role === "editor" && <Badge tone="blue">Shared by {initial.owner.name}</Badge>}
+            <Avatar name={initial.owner.name} size="sm" title={`Owner: ${initial.owner.name}`} />
+            {initial.role !== "owner" && (
+              <Badge tone={roleRegistry[initial.role].tone}>{roleRegistry[initial.role].badge}</Badge>
+            )}
             {can(initial.role, "share") && (
               <Button onPress={() => setShareOpen(true)}>
                 <Share2 aria-hidden className="size-4" /> Share
@@ -91,29 +113,38 @@ export function DocumentEditor({ initial }: { initial: DocumentDTO }) {
             )}
           </div>
         </div>
+      </div>
+
+      <div className="mx-auto w-full max-w-7xl flex-1 px-4 pb-16 sm:px-6">
         {editable && editor && (
-          <div className="mx-auto max-w-5xl border-t border-slate-100 px-4 py-1.5">
+          <div className="sticky top-[8.5rem] z-10 mx-auto mt-5 w-fit max-w-full rounded-2xl bg-white/95 px-2 py-1.5 shadow-lg shadow-slate-900/5 ring-1 ring-slate-200 backdrop-blur">
             <Toolbar editor={editor} />
           </div>
         )}
-      </div>
 
-      <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
-        {status === "conflict" && (
-          <div className="mb-4">
+        <div className="mx-auto mt-5 max-w-[816px] space-y-4">
+          {status === "conflict" && (
             <Alert tone="warning">
               {error}{" "}
               <button className="font-medium underline" onClick={() => window.location.reload()}>Reload</button>
             </Alert>
-          </div>
-        )}
-        {status === "error" && error && <div className="mb-4"><Alert>{error}</Alert></div>}
-        {initial.role === "viewer" && (
-          <div className="mb-4"><Alert tone="info">{initial.owner.name} shared this document with you as a viewer. You can read it but not make changes.</Alert></div>
-        )}
-        <article className="mx-auto max-w-3xl rounded-lg bg-white px-8 py-10 shadow-sm ring-1 ring-slate-200 sm:px-14">
-          {editor ? <EditorContent editor={editor} /> : <div className="min-h-[60vh] animate-pulse" aria-busy="true" />}
-        </article>
+          )}
+          {status === "error" && error && <Alert>{error}</Alert>}
+          {initial.role === "viewer" && (
+            <Alert tone="info">
+              <span className="inline-flex items-center gap-2">
+                <Eye aria-hidden className="size-4 shrink-0" />
+                {initial.owner.name} shared this document with you as a viewer. You can read it but not make changes.
+              </span>
+            </Alert>
+          )}
+          <article className="rounded-sm bg-white px-8 py-12 shadow-[0_1px_3px_rgba(15,23,42,.08),0_12px_32px_-12px_rgba(15,23,42,.18)] ring-1 ring-slate-200/70 sm:px-[72px] sm:py-16">
+            {editor ? <EditorContent editor={editor} /> : <div className="min-h-[70vh] animate-pulse" aria-busy="true" />}
+          </article>
+          <p className="text-right text-xs tabular-nums text-slate-500" aria-live="polite">
+            {words} {words === 1 ? "word" : "words"}
+          </p>
+        </div>
       </div>
 
       {can(initial.role, "share") && (

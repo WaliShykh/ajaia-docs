@@ -2,10 +2,11 @@ import "server-only";
 import { getDb } from "../db";
 import { Unauthorized } from "../errors";
 import { consumeRateLimit } from "../rate-limit";
-import { verifyPassword } from "../auth/password";
+import { hashPassword, verifyPassword } from "../auth/password";
 import { createSession } from "../auth/session";
-import { findUserByEmail } from "../repo/users";
-import type { LoginInput } from "@/shared/schemas";
+import { findUserByEmail, insertUser } from "../repo/users";
+import { ValidationError } from "../errors";
+import type { LoginInput, SignupInput } from "@/shared/schemas";
 import type { UserDTO } from "@/shared/types";
 
 const WINDOW_MS = 15 * 60 * 1000;
@@ -19,6 +20,24 @@ export async function login(input: LoginInput, clientIp: string) {
   const user = await findUserByEmail(db, input.email);
   const ok = await verifyPassword(input.password, user?.passwordHash ?? null);
   if (!user || !ok) throw new Unauthorized("Invalid email or password.");
+
+  const session = await createSession(user.id);
+  const dto: UserDTO = { id: user.id, email: user.email, name: user.name };
+  return { user: dto, ...session };
+}
+
+export async function signup(input: SignupInput, clientIp: string) {
+  // Slows automated account creation from one address.
+  await consumeRateLimit(`signup:${clientIp}`, 10, 60 * 60 * 1000);
+
+  const db = await getDb();
+  const user = await insertUser(db, {
+    name: input.name,
+    email: input.email,
+    passwordHash: await hashPassword(input.password),
+  });
+  // Tradeoff: sign-up necessarily reveals that an email is registered.
+  if (!user) throw new ValidationError("An account with this email already exists. Try signing in.");
 
   const session = await createSession(user.id);
   const dto: UserDTO = { id: user.id, email: user.email, name: user.name };
