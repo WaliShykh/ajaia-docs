@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run typecheck && next build",
-    "vercel-build": "tsx --conditions=react-server scripts/migrate.ts && npm run build",
+    "build": "pnpm typecheck && next build",
+    "vercel-build": "tsx --conditions=react-server scripts/migrate.ts && pnpm build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "next typegen && tsgo --noEmit",
@@ -48,10 +48,10 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5",
-    "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.11"
   },
   "engines": {
     "node": ">=20.9"
-  }
+  },
+  "packageManager": "pnpm@12.9.1"
 }

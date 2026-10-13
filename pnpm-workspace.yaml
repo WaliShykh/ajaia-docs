@@ -1,6 +1,10 @@
+# Only these dependencies may run install scripts (pnpm blocks all others by default).
 allowBuilds:
-  esbuild: set this to true or false
-  unrs-resolver: set this to true or false
+  esbuild: true # native binary for tsx / vitest / drizzle-kit
+  unrs-resolver: true # native resolver used by eslint-config-next
+
+# pnpm's minimum-release-age guard delays freshly published versions (supply-chain protection).
+# These exact versions were already vetted and locked when the project was created.
 minimumReleaseAgeExclude:
   - lucide-react@1.56.0
   - marked@18.1.1

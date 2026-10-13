@@ -25,34 +25,34 @@ The login page has one-click **Sign in as …** buttons for each account.
 
 ## Run locally
 
-Requirements: **Node 20.9+**. No database install is needed.
+Requirements: **Node 20.9+** and **pnpm** (`corepack enable` picks up the pinned version from `package.json`). No database install is needed.
 
 ```bash
-npm install
-npm run dev        # http://localhost:3000
+pnpm install
+pnpm dev            # http://localhost:3000
 ```
 
 Without `DATABASE_URL`, the app uses **PGlite** (Postgres compiled to WASM, running in-process). Data is stored in `./.data/`, and migrations and demo seed data are applied automatically on the first request. Delete `.data/` to reset.
 
-To use a real Postgres instead, copy `.env.example` to `.env.local`, set `DATABASE_URL`, then run `npm run db:migrate`.
+To use a real Postgres instead, copy `.env.example` to `.env.local`, set `DATABASE_URL`, then run `pnpm db:migrate`.
 
 ### Scripts
 
 | Command | What it does |
 |---|---|
-| `npm run dev` | Dev server (Turbopack) |
-| `npm test` | Vitest suites (each file gets a fresh in-memory Postgres) |
-| `npm run typecheck` | Type-check with **TSGo** (`@typescript/native-preview`, the native Go port of `tsc`) |
-| `npm run lint` | ESLint (Next + React Compiler rules) |
-| `npm run build` | TSGo typecheck, then production build |
-| `npm run db:generate` | Generate a SQL migration from `server/schema.ts` (drizzle-kit) |
-| `npm run db:migrate` | Apply migrations and seed demo users to `DATABASE_URL` |
+| `pnpm dev` | Dev server (Turbopack) |
+| `pnpm test` | Vitest suites (each file gets a fresh in-memory Postgres) |
+| `pnpm typecheck` | Type-check with **TSGo** (`@typescript/native-preview`, the native Go port of `tsc`) |
+| `pnpm lint` | ESLint (Next + React Compiler rules) |
+| `pnpm build` | TSGo typecheck, then production build |
+| `pnpm db:generate` | Generate a SQL migration from `server/schema.ts` (drizzle-kit) |
+| `pnpm db:migrate` | Apply migrations and seed demo users to `DATABASE_URL` |
 
 ## Deploy (Vercel + Neon, both free tiers)
 
-1. `npx vercel login`, then `npx vercel link` (or import the Git repo in the Vercel dashboard).
+1. `pnpm dlx vercel login`, then `pnpm dlx vercel link` (or import the Git repo in the Vercel dashboard).
 2. Vercel project → **Storage → Create → Neon Postgres → Connect**. This injects `DATABASE_URL` and `DATABASE_URL_UNPOOLED`.
-3. `npx vercel --prod`. The `vercel-build` script runs migrations and the idempotent seed, then `npm run build`.
+3. `pnpm dlx vercel --prod`. The `vercel-build` script runs migrations and the idempotent seed, then `pnpm build`.
 
 No other secrets are needed: sessions are random tokens stored (hashed) in Postgres, not signed JWTs.
 

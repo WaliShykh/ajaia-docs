@@ -7,7 +7,7 @@ The brief asks for a coherent slice, not a Google Docs clone. I put the time int
 1. **Correct access control.** Sharing is the feature most likely to be subtly wrong. Every permission decision goes through one declarative policy, is enforced on the server, and is covered by tests.
 2. **An editor that feels solid.** Formatting via toolbar *and* shortcuts, autosave with honest status, no lost work on concurrent edits, and a proper read-only mode for viewers.
 3. **Security baseline with no shortcuts.** Sanitization on every write, revocable sessions, CSRF and CSP, rate-limited login, and upload content-sniffing.
-4. **Zero-friction review.** One-click demo logins, `npm i && npm run dev` with no database to install, and a free-tier deployment.
+4. **Zero-friction review.** One-click demo logins, `pnpm i && pnpm dev` with no database to install, and a free-tier deployment.
 
 **Deliberately cut:** real-time co-editing, comments, version history, export, and email invites. Each would be shallow in the timebox. The path to each is described below.
 
@@ -16,7 +16,7 @@ The brief asks for a coherent slice, not a Google Docs clone. I put the time int
 | Concern | Choice | Why |
 |---|---|---|
 | App | Next.js 16 (App Router, route handlers), React 19, TypeScript strict | One deployable unit for UI and API; server components fetch the first page with no client waterfall |
-| Type checking | **TSGo** (`@typescript/native-preview`) | Native-speed `tsc`; gates `npm run build` |
+| Type checking | **TSGo** (`@typescript/native-preview`) | Native-speed `tsc`; gates `pnpm build` |
 | UI primitives | **React Aria Components** + Tailwind v4 | Accessible dialogs, menus, selects, tabs, toolbar (roving focus) and focus management out of the box |
 | Editor | Tiptap 3 (ProseMirror) | Mature schema-based editor; its schema doubles as a whitelist |
 | DB | Postgres via Drizzle ORM: **Neon** in production, **PGlite** locally and in tests | Real Postgres semantics everywhere (enums, keyset pagination, `ON CONFLICT`), but no install for reviewers, and each test file gets a fresh database |
@@ -98,7 +98,7 @@ rate_limits(key, window_start, count)  PK (key, window_start)
 - **IP-keyed rate limits depend on the host.** They trust `x-real-ip` / `x-forwarded-for`, which Vercel sets correctly.
 - **Successful logins count toward the per-account limit.**
 - **Zip bombs inside `.docx` aren't size-checked after decompression.** Mitigation would be checking uncompressed entry sizes before handing the file to mammoth.
-- **`npm audit` findings are outside our code paths.**
+- **`pnpm audit` findings are outside our code paths.**
   - The moderate `sprintf-js` advisory comes from mammoth's CLI argument parser, which we never invoke.
   - The high `braces` advisories are in the dev-only ESLint toolchain.
 
