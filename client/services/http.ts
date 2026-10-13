@@ -22,7 +22,6 @@ export async function api<T>(path: string, init: { method?: string; json?: unkno
   }
   if (res.status === 401 && typeof window !== "undefined" && path !== apiPaths.auth.login) {
     // Session expired or revoked: a full reload drops any client state from the old session.
-    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
     window.location.assign(routePaths.login);
   }
   if (res.status === 204) return undefined as T;
