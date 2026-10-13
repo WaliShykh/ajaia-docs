@@ -1,15 +1,16 @@
 # Only what's needed to build and run goes to Vercel.
-node_modules
-.next
-.data
-.env*
-!.env.example
-coverage
+# Patterns are anchored with a leading "/" so they only match at the repo root —
+# an unanchored "docs" would also drop app/(app)/docs (the document page route).
+/node_modules
+/.next
+/.data
+/.env*
+/coverage
 *.log
 *.tsbuildinfo
-tests
-docs
-AI_WORKFLOW.md
-ARCHITECTURE.md
-SUBMISSION.md
-VIDEO_URL.txt
+/tests
+/docs
+/AI_WORKFLOW.md
+/ARCHITECTURE.md
+/SUBMISSION.md
+/VIDEO_URL.txt
