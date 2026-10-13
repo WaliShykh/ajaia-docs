@@ -1,7 +1,7 @@
 # Submission: Ajaia Docs
 
 **Candidate:** Wali Ahmad
-**Live product:** _LIVE_URL_
+**Live product:** https://ajaia-docs-one-iota.vercel.app
 **Walkthrough video:** see `VIDEO_URL.txt`
 
 ## Test accounts

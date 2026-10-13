@@ -2,7 +2,7 @@
 
 A lightweight collaborative document editor: create, format, import and share rich-text documents with role-based access.
 
-**Live demo:** _LIVE_URL_ · **Walkthrough video:** see [`VIDEO_URL.txt`](VIDEO_URL.txt)
+**Live demo:** https://ajaia-docs-one-iota.vercel.app · **Walkthrough video:** see [`VIDEO_URL.txt`](VIDEO_URL.txt)
 
 | Demo account | Password | What to try |
 |---|---|---|
