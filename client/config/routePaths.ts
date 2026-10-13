@@ -12,7 +12,6 @@ export const apiPaths = {
   auth: {
     login: "/api/auth/login",
     logout: "/api/auth/logout",
-    me: "/api/auth/me",
   },
   documents: {
     list: (params: { scope: "owned" | "shared"; cursor?: string | null }) => {

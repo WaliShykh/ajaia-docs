@@ -18,7 +18,6 @@ const DEBOUNCE_MS = 800;
 export function useAutosave(docId: string, initialVersion: number) {
   const [status, setStatus] = useState<SaveStatus>("saved");
   const [error, setError] = useState<string | null>(null);
-  const [savedAt, setSavedAt] = useState<string | null>(null);
   const version = useRef(initialVersion);
   const pending = useRef<Pending>({});
   const inFlight = useRef(false);
@@ -38,7 +37,6 @@ export function useAutosave(docId: string, initialVersion: number) {
       try {
         const document = await documentService.update(docId, { version: version.current, ...patch });
         version.current = document.version;
-        setSavedAt(document.updatedAt);
         setError(null);
         setStatus("saved");
       } catch (e) {
@@ -86,5 +84,5 @@ export function useAutosave(docId: string, initialVersion: number) {
     };
   }, [flush]);
 
-  return { status, error, savedAt, queue, retry: flush };
+  return { status, error, queue, retry: flush };
 }

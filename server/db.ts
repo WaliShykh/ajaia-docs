@@ -51,5 +51,3 @@ export function getDb(): Promise<Db> {
   });
   return globalForDb.__db;
 }
-
-export { schema };

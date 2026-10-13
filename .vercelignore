@@ -1,0 +1,15 @@
+# Only what's needed to build and run goes to Vercel.
+node_modules
+.next
+.data
+.env*
+!.env.example
+coverage
+*.log
+*.tsbuildinfo
+tests
+docs
+AI_WORKFLOW.md
+ARCHITECTURE.md
+SUBMISSION.md
+VIDEO_URL.txt
